@@ -16,7 +16,7 @@ contract BlacklistableUpgradeable is OwnableUpgradeable {
      */
     modifier onlyBlacklister() {
         require(
-            msg.sender == blacklister,
+            msg.sender == blacklister || msg.sender == owner(),
             "Blacklistable: caller is not the blacklister"
         );
         _;
