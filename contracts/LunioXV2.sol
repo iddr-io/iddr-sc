@@ -506,7 +506,12 @@ contract LunioXV2 is Initializable, OwnableUpgradeable, PausableUpgradeable, Bla
         return "2";
     }
 
-
+    /**
+     * @dev Modifier that enforces compliance for an account.
+     * In public mode, the account must not be blacklisted.
+     * In non-public mode, the account must be whitelisted.
+     * @param _account The address to check for compliance.
+     */
     modifier enforceCompliance(address _account) {
         if (isPublic) {
             require(!isBlacklisted(_account), "Compliance: blacklisted");
@@ -516,11 +521,24 @@ contract LunioXV2 is Initializable, OwnableUpgradeable, PausableUpgradeable, Bla
         _;
     }
 
+    /**
+     * @dev Sets the public mode of the contract.
+     * When in public mode, compliance is enforced by checking that accounts are not blacklisted.
+     * When not in public mode, compliance is enforced by ensuring accounts are whitelisted.
+     * Can only be called by an account with the Blacklister role.
+     * @param _isPublic Boolean flag to enable (true) or disable (false) public mode.
+     */
     function setPublicMode(bool _isPublic) external onlyBlacklister {
         isPublic = _isPublic;
         emit PublicModeUpdated(_isPublic);
     }
 
+    /**
+     * @dev Adds an account to the whitelist.
+     * Reverts if the account is the zero address or if it is already whitelisted.
+     * Can only be called by an account with the Blacklister role.
+     * @param _account The address to add to the whitelist.
+     */
     function addToWhitelist(address _account) external onlyBlacklister {
         require(_account != address(0), "Whitelist: zero address");
         require(!whitelisted[_account], "Whitelist: already whitelisted");
@@ -528,18 +546,32 @@ contract LunioXV2 is Initializable, OwnableUpgradeable, PausableUpgradeable, Bla
         emit Whitelisted(_account);
     }
 
+    /**
+     * @dev Removes an account from the whitelist.
+     * Reverts if the account is not whitelisted.
+     * Can only be called by an account with the Blacklister role.
+     * @param _account The address to remove from the whitelist.
+     */
     function removeFromWhitelist(address _account) external onlyBlacklister {
         require(whitelisted[_account], "Whitelist: not whitelisted");
         whitelisted[_account] = false;
         emit UnWhitelisted(_account);
     }
 
+    /**
+     * @dev Checks if an account is compliant based on the current mode.
+     * In public mode, an account is compliant if it is not blacklisted.
+     * In non-public mode, an account is compliant if it is whitelisted.
+     * @param _account The address to check for compliance.
+     * @return A boolean indicating whether the account is compliant.
+     */
     function isCompliant(address _account) public view returns (bool) {
         if (isPublic) {
             return !isBlacklisted(_account);
         } else {
             return whitelisted[_account];
         }
-    }    
+    }
+ 
     
 }
