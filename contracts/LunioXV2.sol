@@ -573,5 +573,4 @@ contract LunioXV2 is Initializable, OwnableUpgradeable, PausableUpgradeable, Bla
         }
     }
  
-    
 }
